@@ -1,0 +1,1 @@
+g++ -o main.out test.cpp -lGLEW -lglfw3 -lGL  -lXrandr -lXxf86vm -lXinerama -lXcursor -lrt -lm -lglfw3 -lm -lGL -lGLU -lstdc++fs
