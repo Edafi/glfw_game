@@ -31,7 +31,12 @@ menuBar initMenuBar(char barName[], float x, float y, float width, float height,
     bar->verticies[3] = bar->verticies[5] = y - height;
     bar->verticies[4] = bar->verticies[6] = x + width;
     bar->underMouse = false;
-    bar->num_quads = stb_easy_font_print(0, 0, barName, NULL, bar -> buffer, sizeof(bar -> buffer));
+    bar->num_quads = stb_easy_font_print(x, y, barName, NULL, bar -> buffer, sizeof(bar -> buffer));
+    bar -> textScale = textScale;
+    bar -> textX = -0.8;
+    bar -> textY = y + (height - stb_easy_font_width(barName) * textScale)/2.0;
+    bar -> textX = textScale * 2;
+    bar -> textY = textScale * -1;
     bar->gameState = state;
     return *bar;
 }
@@ -39,10 +44,7 @@ menuBar initMenuBar(char barName[], float x, float y, float width, float height,
 void renderMenuBar(menuBar bar){
     glVertexPointer(2, GL_FLOAT, 0, bar.verticies);
     glEnableClientState(GL_VERTEX_ARRAY);
-    if(bar.underMouse) 
-        glColor3f(0.2f, 1.0f, 0.2f);
-    else 
-        glColor3f(0.6f,0.6f,0.8f);
+    glColor3f(0.2f, 0.5f, 0.2f);
     glDrawArrays(GL_TRIANGLE_FAN,0,4);
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(1);
@@ -50,9 +52,9 @@ void renderMenuBar(menuBar bar){
     glDisableClientState(GL_VERTEX_ARRAY);
 
     glPushMatrix();
-    glColor3f(0,0,0);
-    glTranslatef(bar.textX, bar.textY, 0);
-    glScalef(bar.textScale, bar.textScale, 1);
+    glColor3f(1,0,0);
+    glTranslatef(-0.77, 0.77, 0);
+    glScalef(bar.textScale, -1 * bar.textScale, 1);
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(2, GL_FLOAT, 4*sizeof(float), bar.buffer);
     glDrawArrays(GL_QUADS, 0, bar.num_quads*4);
