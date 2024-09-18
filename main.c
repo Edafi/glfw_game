@@ -12,7 +12,10 @@
 #define true 1
 #define false 0
 #define GLEW_STATIC
+#define WINDOW_WIDTH 1980
+#define WINDOW_HEIGHT 1280
 
+bool globalState = false;   //false - menu, true - game
 
  void print_string(float x, float y, char *text, float r, float g, float b)
  {
@@ -28,11 +31,10 @@
      glDisableClientState(GL_VERTEX_ARRAY);
  }
 
-//input controll
 void processInput(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+        globalState = false;
 }
 
 
@@ -51,16 +53,15 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
-const unsigned int SCR_WIDTH = 1024;
-const unsigned int SCR_HEIGHT = 800;
-
 int main()
 {
 GLFWwindow* window;
+    bool state = false; //true - game is on | false - menu is on
+
     glfwSetErrorCallback(error_callback);
     if (!glfwInit())
         exit(EXIT_FAILURE);
-    window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "KMS", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -69,8 +70,8 @@ GLFWwindow* window;
 
     struct menuBar start, quit;
 
-    start = initMenuBar("Start", -0.8, 0.8, 0.4, 0.2, 0.01, 1);
-
+    start = initMenuBar("Start", 200, 200, 400, 100, 7, -1090, -1180);
+    quit = initMenuBar("Quit", 200, 400, 400, 100, 7, -1070, -2380);
     glfwMakeContextCurrent(window);
 
     glfwSetKeyCallback(window, key_callback);
@@ -86,32 +87,34 @@ GLFWwindow* window;
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        //glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+        glOrtho(0.0f, width, height, 0.0f, 0.0f, 1.0f);
         
         
-        glPushMatrix();
+        //glPushMatrix();
+//
+        //glMatrixMode(GL_MODELVIEW);
+        //glLoadIdentity();
+//
+        //glBegin(GL_TRIANGLES);
+        //glColor3f(1.f, 0.f, 0.f);
+        //glVertex3f(-0.6f, -0.4f, 0.f);
+        //glColor3f(0.f, 1.f, 0.f);
+        //glVertex3f(0.6f, -0.4f, 0.f);
+        //glColor3f(0.f, 0.f, 1.f);
+        //glVertex3f(0.f, 0.6f, 0.f);
+        //glEnd();
+        //glPopMatrix();
+//
+//
+        //glPushMatrix();
+        //glScaled(0.02, -0.02, 0);
+        //print_string(0, 0, "Hello", 1.0, 1.0, 1.0);
+        //glPopMatrix();
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        //glRotatef((float)glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
-
-        glBegin(GL_TRIANGLES);
-        glColor3f(1.f, 0.f, 0.f);
-        glVertex3f(-0.6f, -0.4f, 0.f);
-        glColor3f(0.f, 1.f, 0.f);
-        glVertex3f(0.6f, -0.4f, 0.f);
-        glColor3f(0.f, 0.f, 1.f);
-        glVertex3f(0.f, 0.6f, 0.f);
-        glEnd();
-        glPopMatrix();
-
-
-        glPushMatrix();
-        glScaled(0.02, -0.02, 0);
-        print_string(0, 0, "Hello", 1.0, 1.0, 1.0);
-        glPopMatrix();
-
-        renderMenuBar(start);
+        renderMenuBar(start, window);
+        renderMenuBar(quit,  window);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
