@@ -5,14 +5,13 @@
 #include <GL/glx.h>    
 #include <stdlib.h>
 #include <stdio.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb-master/stb_image.h"
 #include "menu.c"
+#include "texturing.c"
 #define true 1
 #define false 0
 #define GLEW_STATIC
-#define WINDOW_WIDTH 1980
-#define WINDOW_HEIGHT 1280
+#define WINDOW_WIDTH 1920 
+#define WINDOW_HEIGHT 1080 
 
 bool globalState = false;   //false - menu, true - game
 
@@ -30,7 +29,7 @@ bool globalState = false;   //false - menu, true - game
      glDisableClientState(GL_VERTEX_ARRAY);
  }
 
-void processInput(GLFWwindow *window)
+void processInputEsc(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         globalState = false;
@@ -45,11 +44,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 static void error_callback(int error, const char* description)
 {
     fputs(description, stderr);
-}
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
 int main()
@@ -71,54 +65,33 @@ GLFWwindow* window;
 
     start = initMenuBar("Start", 200, 200, 400, 100, 7, -1090, -1180);
     quit = initMenuBar("Quit", 200, 400, 400, 100, 7, -1070, -2380);
+
     glfwMakeContextCurrent(window);
 
-    glfwSetKeyCallback(window, key_callback);
+    unsigned int backgroundTex;
+    char backgroundPath[] = "src/Background.png";
+    initTexture(backgroundPath, &backgroundTex);
+
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0.0f, width, height, 0.0f, 0.0f, 1.0f);
+    
     while (!glfwWindowShouldClose(window))
     {
-        //float ratio;
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-        //ratio = width / (float)height;
-
-        glViewport(0, 0, width, height);
+        processInputEsc(window);
+        framebuffer_size_callback(window, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
-
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(0.0f, width, height, 0.0f, 0.0f, 1.0f);
-        
-        
-        //glPushMatrix();
-//
-        //glMatrixMode(GL_MODELVIEW);
-        //glLoadIdentity();
-//
-        //glBegin(GL_TRIANGLES);
-        //glColor3f(1.f, 0.f, 0.f);
-        //glVertex3f(-0.6f, -0.4f, 0.f);
-        //glColor3f(0.f, 1.f, 0.f);
-        //glVertex3f(0.6f, -0.4f, 0.f);
-        //glColor3f(0.f, 0.f, 1.f);
-        //glVertex3f(0.f, 0.6f, 0.f);
-        //glEnd();
-        //glPopMatrix();
-//
-//
-        //glPushMatrix();
-        //glScaled(0.02, -0.02, 0);
-        //print_string(0, 0, "Hello", 1.0, 1.0, 1.0);
-        //glPopMatrix();
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+        renderTexture(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, backgroundTex);
         renderMenuBar(start, window);
         renderMenuBar(quit,  window);
-
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    //deleteMenu(shaderProgram);
     glfwTerminate();
     return 0;
 }

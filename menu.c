@@ -29,7 +29,7 @@ void mouse_button_callback_start(GLFWwindow* window, int button, int action, int
 
 typedef struct menuBar{
     char name[nameLenght];
-    GLfloat verticies[8];
+    GLfloat vertices[8];
     int num_quads;
     float textX, textY, textScale;
     float buffer[50*nameLenght];
@@ -38,14 +38,12 @@ typedef struct menuBar{
 menuBar initMenuBar(char barName[], float x, float y, float width, float height, float scale, float textCoordX, float textCoordY){
     menuBar *bar = malloc(sizeof(struct menuBar));
     strcpy(bar->name, barName);
-    bar->verticies[0] = bar->verticies[2] = x;
-    bar->verticies[1] = bar->verticies[7] = y;
-    bar->verticies[3] = bar->verticies[5] = y + height;
-    bar->verticies[4] = bar->verticies[6] = x + width;
+    bar->vertices[0] = bar->vertices[2] = x;
+    bar->vertices[1] = bar->vertices[7] = y;
+    bar->vertices[3] = bar->vertices[5] = y + height;
+    bar->vertices[4] = bar->vertices[6] = x + width;
     bar->num_quads = stb_easy_font_print(x, y, barName, NULL, bar -> buffer, sizeof(bar -> buffer));
     bar -> textScale = scale;
-    //bar -> textX = x + (width - stb_easy_font_width(barName) * scale) / 2.0;
-    //bar -> textY = y + (height - stb_easy_font_width(barName) * scale)/2.0;
     bar -> textX = textCoordX;
     bar -> textY = textCoordY;
     return *bar;
@@ -56,9 +54,9 @@ void renderMenuBar(menuBar bar, GLFWwindow *window){
     glfwGetCursorPos(window, &mouseX, &mouseY);
 
     glPushMatrix();
-    glVertexPointer(2, GL_FLOAT, 0, bar.verticies);
+    glVertexPointer(2, GL_FLOAT, 0, bar.vertices);
     glEnableClientState(GL_VERTEX_ARRAY);
-    if(mouseX >= bar.verticies[0] && mouseX <= bar.verticies[4] && mouseY >= bar.verticies[1] && mouseY <= bar.verticies[3]){
+    if(mouseX >= bar.vertices[0] && mouseX <= bar.vertices[4] && mouseY >= bar.vertices[1] && mouseY <= bar.vertices[3]){
         glColor3f(0.8f, 0.5f, 0.8f);
         if(strcmp(bar.name, "Quit") == 0)
             glfwSetMouseButtonCallback(window, mouse_button_callback_quit);

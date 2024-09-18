@@ -6,28 +6,51 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb-master/stb_image.h"
 
-void initTexture (char path, unsigned int *texture){
+void initTexture (char path[], unsigned int *texture){
     int width, height, nrChannels;
     glGenTextures(1, texture);
-    glBindTexture(GL_TEXTURE_2D, *texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
+    glBindTexture(GL_TEXTURE_2D, *texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-    unsigned char *data = stbi_load("", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, nrChannels == 4? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
     {
         printf("Failed to load texture\n");
     }
+    glBindTexture(GL_TEXTURE_2D, 0); 
     stbi_image_free(data);
 }
 
+void renderTexture (float x, float y, float width, float height, unsigned int texture){
+    float vertices[] = {
+         // |-----------------positions----------------|   |----texture coords---|
+         x,             y,           0.0f,     0.0f, 0.0f,    
+         x + width,      y,           0.0f,    1.0f, 0.0f,    
+         x + width,     y + height, 0.0f,   1.0f, 1.0f,    
+         x,             y +  height,0.0f,   0.0f, 1.0f     
+    };
+    
+    glEnable(GL_TEXTURE_2D);                    
+    glBindTexture(GL_TEXTURE_2D, texture);   
+
+    glPushMatrix();
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), vertices);
+    glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), vertices + 3);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glPopMatrix();
+    glDisable(GL_ALPHA_TEST);                   
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+}
