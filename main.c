@@ -3,7 +3,6 @@
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 #include <GL/glx.h>    
-#include <GL/gl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #define STB_IMAGE_IMPLEMENTATION

@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb-master/stb_image.h"
 #include "menu.c"
 #define true 1
 #define false 0
