@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "menu.c"
-#include "texturing.c"
+#include "character.c"
 #define true 1
 #define false 0
 #define GLEW_STATIC
@@ -80,15 +80,20 @@ GLFWwindow* window;
     
     while (!glfwWindowShouldClose(window))
     {
-        processInputEsc(window);
         framebuffer_size_callback(window, width, height);
-        glClear(GL_COLOR_BUFFER_BIT);
-
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+        glClear(GL_COLOR_BUFFER_BIT);
         renderTexture(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, backgroundTex);
-        renderMenuBar(start, window);
-        renderMenuBar(quit,  window);
+        if(globalState){
+            processInputEsc(window);
+            
+        }
+        else{
+            renderMenuBar(start, window);
+            renderMenuBar(quit,  window);
+        }
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
