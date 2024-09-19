@@ -5,6 +5,7 @@
 #include <GL/glx.h>    
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb-master/stb_image.h"
+#include "menu.c"
 
 void initTexture (char path[], unsigned int *texture){
     int width, height, nrChannels;

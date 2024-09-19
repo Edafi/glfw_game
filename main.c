@@ -5,13 +5,13 @@
 #include <GL/glx.h>    
 #include <stdlib.h>
 #include <stdio.h>
-#include "menu.c"
+//#include "menu.c"
 #include "texturing.c"
 #define true 1
 #define false 0
 #define GLEW_STATIC
-#define WINDOW_WIDTH 1920 
-#define WINDOW_HEIGHT 1080 
+#define WINDOW_WIDTH 1600
+#define WINDOW_HEIGHT 900
 
 bool globalState = false;   //false - menu, true - game
 
@@ -80,15 +80,20 @@ GLFWwindow* window;
     
     while (!glfwWindowShouldClose(window))
     {
-        processInputEsc(window);
         framebuffer_size_callback(window, width, height);
-        glClear(GL_COLOR_BUFFER_BIT);
-
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+        glClear(GL_COLOR_BUFFER_BIT);
         renderTexture(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, backgroundTex);
-        renderMenuBar(start, window);
-        renderMenuBar(quit,  window);
+        if(globalState){
+            processInputEsc(window);
+            
+        }
+        else{
+            renderMenuBar(start, window);
+            renderMenuBar(quit,  window);
+        }
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
