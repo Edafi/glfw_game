@@ -32,15 +32,16 @@ void initTexture (char path[], unsigned int *texture){
 void renderTexture (float x, float y, float width, float height, unsigned int texture){
     float vertices[] = {
          // |-----------------positions----------------|   |----texture coords---|
-         x,             y,           0.0f,     0.0f, 0.0f,    
-         x + width,      y,           0.0f,    1.0f, 0.0f,    
-         x + width,     y + height, 0.0f,   1.0f, 1.0f,    
-         x,             y +  height,0.0f,   0.0f, 1.0f     
+         x,             y,           0.0f,     0.0f, 0.0f,    //top left
+         x + width,      y,           0.0f,    1.0f, 0.0f,    //top right
+         x + width,     y + height, 0.0f,   1.0f, 1.0f,  //bot right  
+         x,             y +  height,0.0f,   0.0f, 1.0f   //bot left
     };
     
     glEnable(GL_TEXTURE_2D);                    
     glBindTexture(GL_TEXTURE_2D, texture);   
-
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.5);
     glPushMatrix();
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -58,13 +59,13 @@ void renderTexture (float x, float y, float width, float height, unsigned int te
 void renderTextureVertices(float vertices[], unsigned int texture){
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture);
-    //glEnable(GL_ALPHA_TEST);
-    //glAlphaFunc(GL_GREATER, 0.5);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.5);
     
     glPushMatrix();
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), vertices);
+    glVertexPointer(2, GL_FLOAT, 5 * sizeof(float), vertices);
     glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), vertices + 3);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     glDisableClientState(GL_VERTEX_ARRAY);
@@ -73,4 +74,5 @@ void renderTextureVertices(float vertices[], unsigned int texture){
     glDisable(GL_ALPHA_TEST);
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_TEXTURE_2D);
+    //printf("hello");
 }

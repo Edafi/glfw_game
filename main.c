@@ -1,5 +1,30 @@
+#ifdef WIN32
+#include <windows.h>
+#elif _POSIX_C_SOURCE >= 199309L
+#include <time.h>   // for nanosleep
+#else
+#include <unistd.h> // for usleep
+#include <time.h>
+#endif
+
+void sleep_ms(int milliseconds){ // cross-platform sleep function
+#ifdef WIN32
+    Sleep(milliseconds);
+#elif _POSIX_C_SOURCE >= 199309L
+    struct timespec ts;
+    ts.tv_sec = milliseconds / 1000;
+    ts.tv_nsec = (milliseconds % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+#else
+    if (milliseconds >= 1000)
+      sleep(milliseconds / 1000);
+    usleep((milliseconds % 1000) * 1000);
+#endif
+}
+
 #define GL_GLEXT_PROTOTYPES 1
 #define GL3_PROTOTYPES 1
+#include <time.h>
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 #include <GL/glx.h>    
@@ -71,14 +96,14 @@ GLFWwindow* window;
     unsigned int backgroundTex;
     char backgroundPath[] = "src/Background.png";
     initTexture(backgroundPath, &backgroundTex);
+
     unsigned int idleTex, runTex, jumpTex;
     char idlePath[] = "src/Idle.png", runPath[] = "src/Run.png", jumpPath[] = "src/Jump.png";
     initTexture(idlePath, &idleTex);
     initTexture(runPath, &runTex);
     initTexture(jumpPath, &jumpTex);
-
     struct Character character;
-    initCharacter(100, 900, idleTex, runTex, jumpTex);
+    character = initCharacter(200, 200, &idleTex, &runTex, &jumpTex);
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
@@ -86,6 +111,7 @@ GLFWwindow* window;
     glLoadIdentity();
     glOrtho(0.0f, width, height, 0.0f, 0.0f, 1.0f);
     
+
     while (!glfwWindowShouldClose(window))
     {
         framebuffer_size_callback(window, width, height);
@@ -95,16 +121,18 @@ GLFWwindow* window;
         renderTexture(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, backgroundTex);
         if(globalState){
             processInputEsc(window);
-            
+            characterState(&character, window);
+            //renderTexture(400, 400, 900, 500, idleTex);
         }
         else{
             renderMenuBar(start, window);
             renderMenuBar(quit,  window);
         }
-
         glfwSwapBuffers(window);
         glfwPollEvents();
+        sleep_ms(75);
     }
+
     glfwTerminate();
     return 0;
 }
