@@ -10,8 +10,8 @@
 #define true 1
 #define false 0
 #define GLEW_STATIC
-#define WINDOW_WIDTH 1920 
-#define WINDOW_HEIGHT 1080 
+#define WINDOW_WIDTH 1600 
+#define WINDOW_HEIGHT 900 
 
 bool globalState = false;   //false - menu, true - game
 
