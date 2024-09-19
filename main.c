@@ -71,6 +71,14 @@ GLFWwindow* window;
     unsigned int backgroundTex;
     char backgroundPath[] = "src/Background.png";
     initTexture(backgroundPath, &backgroundTex);
+    unsigned int idleTex, runTex, jumpTex;
+    char idlePath[] = "src/Idle.png", runPath[] = "src/Run.png", jumpPath[] = "src/Jump.png";
+    initTexture(idlePath, &idleTex);
+    initTexture(runPath, &runTex);
+    initTexture(jumpPath, &jumpTex);
+
+    struct Character character;
+    initCharacter(100, 900, idleTex, runTex, jumpTex);
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
