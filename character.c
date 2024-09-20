@@ -31,7 +31,7 @@ struct Character initCharacter(float x, float y,unsigned int *idle, unsigned int
     character -> width = 200.0f;
     character -> height = 200.0f;
     character -> inAir = false;
-    character -> isTurned = false;
+    character -> isTurned = false;                                  
     character -> vertices[0] = character -> vertices [15] = character -> x;
     character -> vertices[5] = character -> vertices [10] = character -> x + character -> width;
     character -> vertices[1] = character -> vertices [6] = character -> y;
@@ -72,11 +72,13 @@ void renderIdle(Character *character){
     character -> vertices[8] = frameWidth + frameWidth * character -> idleFrame;   // top right x
     character -> vertices[13] = frameWidth + frameWidth * character -> idleFrame; //bot right x
     character -> vertices[18] = 0.0f + frameWidth * character -> idleFrame;//bot left x
-    float verticesTest[20];
-    if (character -> isTurned){
-        character -> vertices[0] = character -> vertices[15] += character -> width;
-        character -> vertices[5] = character -> vertices[10] -= character -> width;
+
+    if(character -> isTurned){
+        float temp = character -> vertices[3];
+        character -> vertices[3] = character -> vertices[18] = character -> vertices[8];
+        character -> vertices[8] = character -> vertices[13] = temp;
     }
+
     renderTextureVertices(character -> vertices, *character -> idleTex);
     character -> idleFrame ++;
     if(character -> idleFrame == 7)
@@ -86,40 +88,41 @@ void renderIdle(Character *character){
 void renderRun(Character *character){
     float frameWidth = 1.0f / 8;                // 7 idle frames
 
-    character -> vertices[3] = 0.0f + frameWidth * character -> idleFrame;  // top left x
-    //character -> vertices[4] = 0.0f;                               // top left y
-    character -> vertices[8] = frameWidth + frameWidth * character -> idleFrame;   // top right x
-    //character -> vertices[9] = 0.0f;                               // top right y
-    character -> vertices[13] = frameWidth + frameWidth * character -> idleFrame; //bot right x
-    //character -> vertices[14] = 1.0f;                              //bot right y
-    character -> vertices[18] = 0.0f + frameWidth * character -> idleFrame;//bot left x
-    //character -> vertices[19] = 1.0f;                              //bot left y
+    character -> vertices[3] = 0.0f + frameWidth * character -> runFrame;  // top left x
+    character -> vertices[8] = frameWidth + frameWidth * character -> runFrame;   // top right x
+    character -> vertices[13] = frameWidth + frameWidth * character -> runFrame; //bot right x
+    character -> vertices[18] = 0.0f + frameWidth * character -> runFrame;//bot left x
+
+    if(character -> isTurned){
+        float temp = character -> vertices[3];
+        character -> vertices[3] = character -> vertices[18] = character -> vertices[8];
+        character -> vertices[8] = character -> vertices[13] = temp;
+    }
+
     renderTextureVertices(character -> vertices, *character -> runTex);
-    character -> idleFrame ++;
-    if(character -> idleFrame == 8)
-        character -> idleFrame = 0;
+    character -> runFrame ++;
+    if(character -> runFrame == 8)
+        character -> runFrame = 0;
 }
 
 void renderJump(Character *character){
     float frameWidth = 1.0f / 5;                // 7 idle frames
 
-    character -> vertices[3] = 0.0f + frameWidth * character -> idleFrame;  // top left x
-    //character -> vertices[4] = 0.0f;                               // top left y
-    character -> vertices[8] = frameWidth + frameWidth * character -> idleFrame;   // top right x
-    //character -> vertices[9] = 0.0f;                               // top right y
-    character -> vertices[13] = frameWidth + frameWidth * character -> idleFrame; //bot right x
-    //character -> vertices[14] = 1.0f;                              //bot right y
-    character -> vertices[18] = 0.0f + frameWidth * character -> idleFrame;//bot left x
-    //character -> vertices[19] = 1.0f;                              //bot left y
-    if (character -> isTurned){
-        float temp =character -> vertices[0];
-        character -> vertices[0] = character -> vertices[15] = character -> vertices[5];
-        character -> vertices[5] = character -> vertices[10] -= temp;
+    character -> vertices[3] = 0.0f + frameWidth * character -> jumpFrame;  // top left x
+    character -> vertices[8] = frameWidth + frameWidth * character -> jumpFrame;   // top right x
+    character -> vertices[13] = frameWidth + frameWidth * character -> jumpFrame; //bot right x
+    character -> vertices[18] = 0.0f + frameWidth * character -> jumpFrame;//bot left x
+
+    if(character -> isTurned){
+        float temp = character -> vertices[3];
+        character -> vertices[3] = character -> vertices[18] = character -> vertices[8];
+        character -> vertices[8] = character -> vertices[13] = temp;
     }
+
     renderTextureVertices(character -> vertices, *character -> jumpTex);
-    character -> idleFrame ++;
-    if(character -> idleFrame == 5)
-        character -> idleFrame = 0;
+    character -> jumpFrame ++;
+    if(character -> jumpFrame == 5)
+        character -> jumpFrame = 0;
 }
 
 void characterState(Character *character, GLFWwindow *window){
@@ -128,15 +131,18 @@ void characterState(Character *character, GLFWwindow *window){
     glfwSetKeyCallback(window, playerInput);
     
     if(A){
-        character -> isTurned = true;
+        if (character -> isTurned == false)
+            character -> isTurned = true;
         renderRun(character);
     }
     else if(D){
-        character -> isTurned = false;
+        if(character -> isTurned){
+            character -> isTurned = false;
+        }
         renderRun(character);
     }
     else if(W){
-        renderRun(character);
+        renderJump(character);
     }
     else{
         renderIdle(character);

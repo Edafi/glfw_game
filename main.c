@@ -103,7 +103,7 @@ GLFWwindow* window;
     initTexture(runPath, &runTex);
     initTexture(jumpPath, &jumpTex);
     struct Character character;
-    character = initCharacter(200, 200, &idleTex, &runTex, &jumpTex);
+    character = initCharacter(200, 700, &idleTex, &runTex, &jumpTex);
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
