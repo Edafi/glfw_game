@@ -37,6 +37,12 @@ struct Character initCharacter(float x, float y,unsigned int *idle, unsigned int
     character -> vertices[1] = character -> vertices [6] = character -> y;
     character -> vertices[11] = character -> vertices [16] = character -> y + character -> height;
     character -> vertices[2] = character -> vertices[7] = character -> vertices[12] = character -> vertices[17] = 0.0f;
+    character -> vertices[4] = 0.0f;                               // top left y
+    character -> vertices[9] = 0.0f;                               // top right y
+    character -> vertices[14] = 1.0f;                              //bot right y
+    character -> vertices[14] = 1.0f;                              //bot right y
+    character -> vertices[19] = 1.0f;                              //bot left y
+
     return *character;
 }
 
@@ -63,13 +69,9 @@ void renderIdle(Character *character){
     float frameWidth = 1.0f / 7;                // 7 idle frames
 
     character -> vertices[3] = 0.0f + frameWidth * character -> idleFrame;  // top left x
-    character -> vertices[4] = 0.0f;                               // top left y
     character -> vertices[8] = frameWidth + frameWidth * character -> idleFrame;   // top right x
-    character -> vertices[9] = 0.0f;                               // top right y
     character -> vertices[13] = frameWidth + frameWidth * character -> idleFrame; //bot right x
-    character -> vertices[14] = 1.0f;                              //bot right y
     character -> vertices[18] = 0.0f + frameWidth * character -> idleFrame;//bot left x
-    character -> vertices[19] = 1.0f;                              //bot left y
     float verticesTest[20];
     if (character -> isTurned){
         character -> vertices[0] = character -> vertices[15] += character -> width;
@@ -81,56 +83,62 @@ void renderIdle(Character *character){
         character -> idleFrame = 0;
 }
 
+void renderRun(Character *character){
+    float frameWidth = 1.0f / 8;                // 7 idle frames
+
+    character -> vertices[3] = 0.0f + frameWidth * character -> idleFrame;  // top left x
+    //character -> vertices[4] = 0.0f;                               // top left y
+    character -> vertices[8] = frameWidth + frameWidth * character -> idleFrame;   // top right x
+    //character -> vertices[9] = 0.0f;                               // top right y
+    character -> vertices[13] = frameWidth + frameWidth * character -> idleFrame; //bot right x
+    //character -> vertices[14] = 1.0f;                              //bot right y
+    character -> vertices[18] = 0.0f + frameWidth * character -> idleFrame;//bot left x
+    //character -> vertices[19] = 1.0f;                              //bot left y
+    renderTextureVertices(character -> vertices, *character -> runTex);
+    character -> idleFrame ++;
+    if(character -> idleFrame == 8)
+        character -> idleFrame = 0;
+}
+
+void renderJump(Character *character){
+    float frameWidth = 1.0f / 5;                // 7 idle frames
+
+    character -> vertices[3] = 0.0f + frameWidth * character -> idleFrame;  // top left x
+    //character -> vertices[4] = 0.0f;                               // top left y
+    character -> vertices[8] = frameWidth + frameWidth * character -> idleFrame;   // top right x
+    //character -> vertices[9] = 0.0f;                               // top right y
+    character -> vertices[13] = frameWidth + frameWidth * character -> idleFrame; //bot right x
+    //character -> vertices[14] = 1.0f;                              //bot right y
+    character -> vertices[18] = 0.0f + frameWidth * character -> idleFrame;//bot left x
+    //character -> vertices[19] = 1.0f;                              //bot left y
+    if (character -> isTurned){
+        float temp =character -> vertices[0];
+        character -> vertices[0] = character -> vertices[15] = character -> vertices[5];
+        character -> vertices[5] = character -> vertices[10] -= temp;
+    }
+    renderTextureVertices(character -> vertices, *character -> jumpTex);
+    character -> idleFrame ++;
+    if(character -> idleFrame == 5)
+        character -> idleFrame = 0;
+}
+
 void characterState(Character *character, GLFWwindow *window){
     extern int A, W, D;
     printf("%d %d %d\n", A, W, D);
     glfwSetKeyCallback(window, playerInput);
+    
     if(A){
-        character -> velocityX = - 10;
-        if(!character -> inAir){
-            A=0;
-            //renderRun(character);
-        }
-        else{
-            A=0;
-            character -> velocityY -= 9.8f;
-            //renderJump(character);
-        } 
+        character -> isTurned = true;
+        renderRun(character);
     }
     else if(D){
-        character -> velocityX = 10;
-        if(!character -> inAir){
-            A=0;
-            //renderRun(character);
-        }
-        else{
-            A=0;
-            character -> velocityY -= 9.8f;
-            //renderJump(character);
-        }
+        character -> isTurned = false;
+        renderRun(character);
     }
-    else if ((W || ((A || D) && W))){
-        if(A)
-            character -> velocityX = - 10;
-        else if (D)
-            character -> velocityX = 10;
-        if(!character -> inAir){
-            character -> velocityY = 30;
-            character -> inAir = true;
-        }
-
-        //renderJump(character);
+    else if(W){
+        renderRun(character);
     }
-    else if(!A && !D && !W){
-        if(!character -> inAir){
-            character -> velocityX = 0;
-            character -> velocityY = 0;
-            renderIdle(character);
-        }
-        else {
-            character -> velocityX = 0;
-            character -> velocityY -= 9.8f;
-            //renderJump(character);
-        }
+    else{
+        renderIdle(character);
     }
 }
