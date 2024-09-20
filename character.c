@@ -41,19 +41,26 @@ struct Character initCharacter(float x, float y,unsigned int *idle, unsigned int
 }
 
 void playerInput(GLFWwindow* window, int key, int scancode, int action, int mods){
-    if (key == GLFW_KEY_A && action == GLFW_PRESS)
+
+    int stateA = glfwGetKey(window, GLFW_KEY_A);
+    if (stateA == GLFW_PRESS)
         A = 1;
-    else if (key == GLFW_KEY_W && action == GLFW_PRESS)
-        W = 1;
-    else if (key == GLFW_KEY_D && action == GLFW_PRESS)
+    else
+        A = 0;
+    int stateD = glfwGetKey(window, GLFW_KEY_D);
+    if(stateD == GLFW_PRESS)
         D = 1;
-    else{
-        A = W = D = 0;
-    }
+    else
+        D = 0;
+    int stateW = glfwGetKey(window, GLFW_KEY_W);
+    if(stateW == GLFW_PRESS)
+        W = 1;
+    else
+        W = 0;
 }
 
 void renderIdle(Character *character){
-    float frameWidth = 1.0f / 7;                // 4 idle frames
+    float frameWidth = 1.0f / 7;                // 7 idle frames
 
     character -> vertices[3] = 0.0f + frameWidth * character -> idleFrame;  // top left x
     character -> vertices[4] = 0.0f;                               // top left y
@@ -64,7 +71,6 @@ void renderIdle(Character *character){
     character -> vertices[18] = 0.0f + frameWidth * character -> idleFrame;//bot left x
     character -> vertices[19] = 1.0f;                              //bot left y
     float verticesTest[20];
-    printf("%d\n", character -> idleFrame);
     if (character -> isTurned){
         character -> vertices[0] = character -> vertices[15] += character -> width;
         character -> vertices[5] = character -> vertices[10] -= character -> width;
@@ -77,6 +83,7 @@ void renderIdle(Character *character){
 
 void characterState(Character *character, GLFWwindow *window){
     extern int A, W, D;
+    printf("%d %d %d\n", A, W, D);
     glfwSetKeyCallback(window, playerInput);
     if(A){
         character -> velocityX = - 10;
@@ -111,6 +118,7 @@ void characterState(Character *character, GLFWwindow *window){
             character -> velocityY = 30;
             character -> inAir = true;
         }
+
         //renderJump(character);
     }
     else if(!A && !D && !W){

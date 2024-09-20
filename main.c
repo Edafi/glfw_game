@@ -111,6 +111,7 @@ GLFWwindow* window;
     glLoadIdentity();
     glOrtho(0.0f, width, height, 0.0f, 0.0f, 1.0f);
     
+    //glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
     while (!glfwWindowShouldClose(window))
     {
