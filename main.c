@@ -35,8 +35,6 @@ void sleep_ms(int milliseconds){ // cross-platform sleep function
 #define true 1
 #define false 0
 #define GLEW_STATIC
-#define WINDOW_WIDTH 1600 
-#define WINDOW_HEIGHT 900 
 
 bool globalState = false;   //false - menu, true - game
 
@@ -131,7 +129,7 @@ GLFWwindow* window;
         }
         glfwSwapBuffers(window);
         glfwPollEvents();
-        sleep_ms(75);
+        sleep_ms(65);
     }
 
     glfwTerminate();

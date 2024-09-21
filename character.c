@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define WINDOW_WIDTH 1600 
+#define WINDOW_HEIGHT 900 
+
 int A, W, D;
 
 typedef struct Character{
@@ -99,6 +102,9 @@ void renderRun(Character *character){
         character -> vertices[8] = character -> vertices[13] = temp;
     }
 
+    character -> vertices[0] = character -> vertices [15] += character -> velocityX;
+    character -> vertices[5] = character -> vertices [10] += character -> velocityX;
+
     renderTextureVertices(character -> vertices, *character -> runTex);
     character -> runFrame ++;
     if(character -> runFrame == 8)
@@ -119,6 +125,11 @@ void renderJump(Character *character){
         character -> vertices[8] = character -> vertices[13] = temp;
     }
 
+    character -> vertices[1] = character -> vertices [6] += character -> velocityY;
+    character -> vertices[11] = character -> vertices [16] += character -> velocityY;
+    character -> vertices[0] = character -> vertices [15] += character -> velocityX;
+    character -> vertices[5] = character -> vertices [10] += character -> velocityX;
+
     renderTextureVertices(character -> vertices, *character -> jumpTex);
     character -> jumpFrame ++;
     if(character -> jumpFrame == 5)
@@ -133,18 +144,37 @@ void characterState(Character *character, GLFWwindow *window){
     if(A){
         if (character -> isTurned == false)
             character -> isTurned = true;
-        renderRun(character);
+
+        if(character -> vertices[0] > 0 && !character -> inAir){
+            character -> velocityX = -20;
+            renderRun(character);
+        }   
+        else{
+            character -> velocityX = 0;
+            renderIdle(character);
+        }
     }
     else if(D){
         if(character -> isTurned){
             character -> isTurned = false;
         }
-        renderRun(character);
+        if(character -> vertices[5] < WINDOW_WIDTH && !character -> inAir){
+            character -> velocityX = 20;
+            renderRun(character);
+        }   
+        else{
+            character -> velocityX = 0;
+            renderIdle(character);
+        }
     }
     else if(W){
+        if(!character -> inAir)
+            character -> velocityY = -30;
+        character -> inAir = true;
         renderJump(character);
     }
     else{
+        character -> velocityX = 0;
         renderIdle(character);
     }
 }
