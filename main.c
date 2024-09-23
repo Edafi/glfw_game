@@ -106,11 +106,12 @@ GLFWwindow* window;
     unsigned int platformTex;
     char platformPath[] = "src/container.jpg";
     initTexture(platformPath, &platformTex);
-    struct Hitbox platform1, platform2;
-    platform1 = initHitbox(400, 500, 300, 150, &platformTex);
-    platform2 = initHitbox(800, 800, 300, 150, &platformTex);
+    struct Hitbox platform1, platform2, platform3;
+    platform1 = initHitbox(400, 500, 500, 50, &platformTex);
+    platform2 = initHitbox(800, 800, 300, 50, &platformTex);
+    platform3 = initHitbox(100, 700, 200, 50, &platformTex);
 
-    struct Hitbox *arrayOfHitboxes [] ={&platform1, &platform2};
+    struct Hitbox *arrayOfHitboxes [] ={&platform1, &platform2, &platform3};
 
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
@@ -131,6 +132,7 @@ GLFWwindow* window;
             processInputEsc(window);
             renderHitbox(&platform1);
             renderHitbox(&platform2);
+            renderHitbox(&platform3);
             characterState(&character, window, arrayOfHitboxes);
             //renderTexture(400, 400, 900, 500, idleTex);
         }
@@ -140,7 +142,7 @@ GLFWwindow* window;
         }
         glfwSwapBuffers(window);
         glfwPollEvents();
-        sleep_ms(100);
+        sleep_ms(50);
     }
 
     glfwTerminate();

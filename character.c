@@ -13,7 +13,7 @@ int A, W, D;
 
 typedef struct Character{
     float x, y, width, height;
-    bool inAir, isTurned;
+    bool inAir, isTurned, isPlatformed, isGrounded;
     unsigned int *idleTex, *runTex, *jumpTex;
     int idleFrame, runFrame, jumpFrame;
     float velocityX, velocityY;
@@ -34,7 +34,9 @@ struct Character initCharacter(float x, float y,unsigned int *idle, unsigned int
     character -> width = 100.0f;
     character -> height = 100.0f;
     character -> inAir = true;
-    character -> isTurned = false;                                  
+    character -> isTurned = false;
+    character -> isPlatformed = false;
+    character -> isGrounded = false;                                  
     character -> vertices[0] = character -> vertices [15] = character -> x;
     character -> vertices[5] = character -> vertices [10] = character -> x + character -> width;
     character -> vertices[1] = character -> vertices [6] = character -> y;
@@ -138,7 +140,7 @@ void renderJump(Character *character, Hitbox *arrayObj[]){
 }
 
 bool checkCollision (Character *character, Hitbox *arrayObj[]){
-    for(int i = 0; i<2; ++i){
+    for(int i = 0; i<3; ++i){
 
         float x11, y11, x12, y12, x21, y21, x22, y22;
         x11 = character -> vertices[0] + character -> velocityX;
@@ -157,72 +159,50 @@ bool checkCollision (Character *character, Hitbox *arrayObj[]){
         bool collision = collisionXLeft && collisionYUp && collisionXRight;
         if (collision)
             return true;
-        /*
-        bool leftSide = x22 >= x12 && x12 >= x21      &&      y21 <= y11 && y11 <= y22     &&       y21 <= y12 && y12 <= y22;      //&&      x11 < x21 && x21 < x22;
-        bool topSide = x22 >= x11 && x11 >= x21       &&      x22 >= x12 && x12 >= x21     &&       y22 >= y12 && y12 >= y21;     //&&      y22 > y21 && y21 > y11;
-        bool rightSide = x22 >= x11 && x11 >= x21     &&      y21 >= y12 && y12 >= y22     &&       y21 >= y11 && y11 >= y22;      //&&      x12 > x22 && x22 > x21;
-        bool botSide = x22 >= x11 && x11 >= x21       &&      x22 >= x12 && x12 >= x21     &&       y21 >= y11 && y11 >= y22;     //&&      y12 > y22 && y22 > y21; 
-        
-        bool leftSide = y11 >= y21 && y12 <= y22 && x12 == x21;
-        bool rightSide = x11 == x22 && y11 >= y21 && y12 <= y22;
-        bool topSide = y12 == y21  && x11 >= x21 && x12 <= x22;
-        bool botSide = y11 == y22 && x11 >= x21 && x12 <= x22; 
-
-        printf("%f %f %f %f\n", x11, y11, x12, y12);
-        if(leftSide ){ //left side platform
-            //character -> velocityY = 0;
-            character -> inAir = true;
-            character -> vertices[5] = character -> vertices [10] = x21 - 1;//character -> velocityX;
-            character -> vertices[0] = character -> vertices [15] = x21 - character -> width + 1;//character -> velocityX;
-            character -> velocityX = 0;
-        }
-        if(rightSide ){ //right side platform
-            //character -> velocityY = 0;
-            character -> vertices[0] = character -> vertices [15] = x22 + 1 ;//character -> velocityX;
-            character -> vertices[5] = character -> vertices [10] = x22 + character ->width + 1;//character -> velocityX;
-            character -> velocityX = 0;
-        }
-        if(topSide ) //on platform
-        {
-            //character -> velocityX = 0;
-            character -> inAir = false;
-            character -> inAir = true;
-            character -> vertices[11] = character -> vertices [16] = y21 - 1;//character -> velocityY;
-            character -> vertices[1] = character -> vertices [6] = y21 - character ->height -1;//character -> velocityY;
-            character -> velocityY = 0;
-        }
-        if(botSide ){ // udner platform
-            //character -> velocityX = 0;
-            character -> inAir = true;
-            character -> vertices[1] = character -> vertices [6] = y21 + 1;//character -> velocityY;
-            character -> vertices[11] = character -> vertices [16] = y21 + character ->height +1;//character -> velocityY;
-            character -> velocityY = 0;
-        }
-        */
     }
     return false;
 }
-
-void jumpPhysics( Character *character, Hitbox *arrayObj[]){
-
-    if(character -> velocityY <0 && checkCollision(character, arrayObj)){
-        character -> velocityY = 10;
-        renderJump(character, arrayObj);
+void jumpPhysics(Character *character, Hitbox *arrayObj[]);
+void checkPlatformed(Character *character, Hitbox *arrayObj[]){
+    if(!checkCollision(character, arrayObj) && character -> isPlatformed && !character -> isGrounded){
+        character -> inAir = true;
+        character -> isPlatformed = false;
     }
-    else if(character -> velocityY >=0 && checkCollision(character, arrayObj)){
+}
+
+void jumpPhysics(Character *character, Hitbox *arrayObj[]){
+
+    if(character -> velocityY >=0 && checkCollision(character, arrayObj)){
         character -> inAir =false;
+        character -> isGrounded = false;
+        character -> isPlatformed = true;
+        character -> vertices[1] = character -> vertices [6] -= 1 ;
+        character -> vertices[11] = character -> vertices [16] -= 1;
         character ->velocityY = 0;
         renderIdle(character);
     }
 
+    else if(character -> velocityY <0 && checkCollision(character, arrayObj)){
+        character -> inAir = true;
+        character -> isGrounded = false;
+        character -> isPlatformed = false;
+        character -> velocityY = 100;
+        renderJump(character, arrayObj);
+    }
+
     if(character -> inAir && character -> vertices[11]< 900){
         character -> velocityY +=10;
+        character -> inAir = true;
+        character -> isGrounded = false;
+        character -> isPlatformed = false;
         if(!(character -> vertices[0] > 0 - character->width/2.5 && character -> vertices[5] < WINDOW_WIDTH + character->width/2.5))
             character -> velocityX = 0;
         renderJump(character,arrayObj);
     }
-    else{
+    else if (!checkCollision(character, arrayObj) && character -> inAir){
         character -> inAir = false;
+        character -> isPlatformed = false;
+        character -> isGrounded = true;
         character -> velocityY = 0;
         character -> vertices[1] = character -> vertices [6] = 800 ;
         character -> vertices[11] = character -> vertices [16] = 900;
@@ -233,12 +213,13 @@ void jumpPhysics( Character *character, Hitbox *arrayObj[]){
 
 void characterState(Character *character, GLFWwindow *window, Hitbox *arrayObj[]){
     extern int A, W, D;
+    checkPlatformed(character ,arrayObj);
     glfwSetKeyCallback(window, playerInput);
     if(A && !character -> inAir){
         character -> isTurned = true;
-        if(character -> vertices[0] > 0 - character->width/2.5 && !character -> inAir){
+        if(character -> vertices[0] > 0 - character->width/2.5){
             character -> velocityX = -20;
-            if(checkCollision(character, arrayObj)){
+            if(checkCollision(character, arrayObj) && character -> isGrounded){
                 printf("collisinon A\n");
                 renderIdle(character);
             }
@@ -254,13 +235,13 @@ void characterState(Character *character, GLFWwindow *window, Hitbox *arrayObj[]
     }
     else if(D && !character -> inAir){
         character -> isTurned = false;
-        if(character -> vertices[5] < WINDOW_WIDTH + character->width/2.5 && !character -> inAir){
+        if(character -> vertices[5] < WINDOW_WIDTH + character->width/2.5){
             character -> velocityX = 20;
-            if(checkCollision(character, arrayObj)){
+            if(checkCollision(character, arrayObj) && character -> isGrounded){
                 printf("collisinon D\n");
                 renderIdle(character);
             }
-            else{
+            else{ 
             character -> velocityX = 20;
             renderRun(character, arrayObj);
             }
@@ -271,20 +252,13 @@ void characterState(Character *character, GLFWwindow *window, Hitbox *arrayObj[]
         }
     }
     else if((W &&(A || D) || W) && !character -> inAir){
-        if(!character -> inAir){
-            character -> velocityY = -80;
-            character -> inAir = true;
-            if(checkCollision(character, arrayObj)){
-                printf("W start collision\n");
-                character -> velocityY = 10;
-                jumpPhysics(character, arrayObj);
-            }
-            else
-            jumpPhysics(character, arrayObj);
-        }
-        else{
-            jumpPhysics(character, arrayObj);
-        }
+        character -> velocityY = -75;
+        character -> inAir = true;
+        character -> isGrounded = false;
+        renderJump(character, arrayObj);
+    }
+    else if(character -> inAir){
+        jumpPhysics(character, arrayObj);
     }
     else {
         renderIdle(character);
